@@ -14,6 +14,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Los datos del dominio se agregarán en la Etapa 2.
+        // Intencionalmente vacío: esta etapa no requiere cuentas ni datos demostrativos.
     }
 }
