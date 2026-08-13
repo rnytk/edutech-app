@@ -13,12 +13,37 @@ class ModuloPolicy
         private readonly ServicioDesbloqueo $servicioDesbloqueo,
     ) {}
 
+    public function viewAny(Usuario $usuario): bool
+    {
+        return $this->esSuperadministradorActivo($usuario);
+    }
+
     public function view(Usuario $usuario, Modulo $modulo): bool
     {
-        if ($usuario->activo && $usuario->rol === RolUsuario::Superadministrador) {
+        if ($this->esSuperadministradorActivo($usuario)) {
             return true;
         }
 
         return $this->servicioDesbloqueo->moduloEstaDesbloqueado($usuario, $modulo);
+    }
+
+    public function create(Usuario $usuario): bool
+    {
+        return $this->esSuperadministradorActivo($usuario);
+    }
+
+    public function update(Usuario $usuario, Modulo $modulo): bool
+    {
+        return $this->esSuperadministradorActivo($usuario);
+    }
+
+    public function delete(Usuario $usuario, Modulo $modulo): bool
+    {
+        return false;
+    }
+
+    private function esSuperadministradorActivo(Usuario $usuario): bool
+    {
+        return $usuario->activo && $usuario->rol === RolUsuario::Superadministrador;
     }
 }

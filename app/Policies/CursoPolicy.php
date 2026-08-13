@@ -25,6 +25,21 @@ class CursoPolicy
             || $this->servicioAccesoCursos->puedeAcceder($usuario, $curso);
     }
 
+    public function create(Usuario $usuario): bool
+    {
+        return $this->esSuperadministradorActivo($usuario);
+    }
+
+    public function update(Usuario $usuario, Curso $curso): bool
+    {
+        return $this->esSuperadministradorActivo($usuario);
+    }
+
+    public function delete(Usuario $usuario, Curso $curso): bool
+    {
+        return false;
+    }
+
     private function esSuperadministradorActivo(Usuario $usuario): bool
     {
         return $usuario->activo && $usuario->rol === RolUsuario::Superadministrador;

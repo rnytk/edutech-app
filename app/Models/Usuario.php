@@ -3,13 +3,16 @@
 namespace App\Models;
 
 use App\Enums\RolUsuario;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasName;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class Usuario extends Authenticatable
+class Usuario extends Authenticatable implements FilamentUser, HasName
 {
     use HasFactory, Notifiable;
 
@@ -44,6 +47,18 @@ class Usuario extends Authenticatable
     public function getRememberTokenName(): string
     {
         return 'token_recordatorio';
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $panel->getId() === 'admin'
+            && $this->activo
+            && $this->rol === RolUsuario::Superadministrador;
+    }
+
+    public function getFilamentName(): string
+    {
+        return $this->nombre;
     }
 
     public function colegio(): BelongsTo
