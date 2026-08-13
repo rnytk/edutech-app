@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\Curso;
 use App\Models\Modulo;
 use App\Models\Nivel;
 use App\Models\Usuario;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class ServicioDesbloqueo
 {
@@ -68,5 +70,39 @@ class ServicioDesbloqueo
             ->whereDoesntHave('progresosUsuarios', fn (Builder $progresos): Builder => $progresos
                 ->where('usuario_id', $usuario->getKey()))
             ->exists();
+    }
+
+    /**
+     * @param  Collection<int, Nivel>  $niveles
+     * @param  array<int, true>  $modulosCompletados
+     * @return array{niveles: array<int, bool>, modulos: array<int, bool>}
+     */
+    public function calcularEstadosCurso(
+        Usuario $usuario,
+        Curso $curso,
+        Collection $niveles,
+        array $modulosCompletados,
+    ): array {
+        $estados = ['niveles' => [], 'modulos' => []];
+        $nivelDisponible = $this->servicioAccesoCursos->puedeAcceder($usuario, $curso);
+
+        foreach ($niveles as $nivel) {
+            $estados['niveles'][$nivel->getKey()] = $nivelDisponible;
+            $moduloDisponible = $nivelDisponible;
+
+            foreach ($nivel->modulos as $modulo) {
+                $estados['modulos'][$modulo->getKey()] = $moduloDisponible;
+
+                if (! isset($modulosCompletados[$modulo->getKey()])) {
+                    $moduloDisponible = false;
+                }
+            }
+
+            if (! $moduloDisponible) {
+                $nivelDisponible = false;
+            }
+        }
+
+        return $estados;
     }
 }

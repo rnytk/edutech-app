@@ -46,6 +46,13 @@ class CursoResource extends Resource
                 ->disk('public')
                 ->directory('cursos')
                 ->visibility('public'),
+            TextInput::make('titulo_bienvenida')
+                ->label('Título de bienvenida')
+                ->maxLength(255)
+                ->columnSpanFull(),
+            RichEditor::make('contenido_bienvenida')
+                ->label('Contenido de bienvenida')
+                ->columnSpanFull(),
             Toggle::make('publicado')->label('Publicado')->default(false),
         ]);
     }

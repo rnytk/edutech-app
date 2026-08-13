@@ -1,3 +1,5 @@
+@props(['inmersivo' => false])
+
 <!DOCTYPE html>
 <html lang="es">
     <head>
@@ -12,6 +14,7 @@
     </head>
     <body class="min-h-dvh bg-[#F0F0F0] font-sans text-[#012562] antialiased">
         <div class="flex min-h-dvh flex-col">
+            @unless ($inmersivo)
             <header class="bg-[#012562] text-white shadow-lg">
                 <div class="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
                     <a href="{{ route('portal.inicio') }}" class="flex min-w-0 items-center gap-3 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#FFD629]" wire:navigate>
@@ -47,8 +50,12 @@
                     </div>
                 </div>
             </header>
+            @endunless
 
-            <main class="mx-auto flex w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+            <main @class([
+                'flex w-full flex-1',
+                'mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8' => ! $inmersivo,
+            ])>
                 {{ $slot }}
             </main>
         </div>

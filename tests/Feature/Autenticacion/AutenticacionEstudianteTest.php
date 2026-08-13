@@ -132,7 +132,7 @@ class AutenticacionEstudianteTest extends PruebaDominio
         $this->actingAs($estudiante)
             ->get('/dashboard')
             ->assertSuccessful()
-            ->assertSee('¡Bienvenido, Ana Estudiante!')
+            ->assertSee('¡Hola, Ana Estudiante!')
             ->assertSee('Cerrar sesión');
     }
 

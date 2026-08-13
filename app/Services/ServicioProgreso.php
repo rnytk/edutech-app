@@ -11,6 +11,8 @@ use App\Models\ProgresoModuloUsuario;
 use App\Models\Usuario;
 use DomainException;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\DB;
 
 class ServicioProgreso
@@ -53,6 +55,50 @@ class ServicioProgreso
         [$completados, $total] = $this->conteosCurso($usuario, $curso);
 
         return $this->calcularPorcentaje($completados, $total);
+    }
+
+    /**
+     * @param  Collection<int, Curso>  $cursos
+     * @return array<int, array{completados: int, total: int, porcentaje: int, completado: bool}>
+     */
+    public function resumirCursos(Usuario $usuario, Collection $cursos): array
+    {
+        return $this->resumirAgrupados(
+            $usuario,
+            'niveles.curso_id',
+            $cursos->modelKeys(),
+        );
+    }
+
+    /**
+     * @param  Collection<int, Nivel>  $niveles
+     * @return array<int, array{completados: int, total: int, porcentaje: int, completado: bool}>
+     */
+    public function resumirNiveles(Usuario $usuario, Collection $niveles): array
+    {
+        return $this->resumirAgrupados(
+            $usuario,
+            'modulos.nivel_id',
+            $niveles->modelKeys(),
+        );
+    }
+
+    /**
+     * @param  Collection<int, Modulo>  $modulos
+     * @return array<int, true>
+     */
+    public function obtenerModulosCompletados(Usuario $usuario, Collection $modulos): array
+    {
+        if ($modulos->isEmpty()) {
+            return [];
+        }
+
+        return ProgresoModuloUsuario::query()
+            ->where('usuario_id', $usuario->getKey())
+            ->whereIn('modulo_id', $modulos->modelKeys())
+            ->pluck('modulo_id')
+            ->mapWithKeys(fn (int $moduloId): array => [$moduloId => true])
+            ->all();
     }
 
     public function puedeFinalizarModulo(Usuario $usuario, Modulo $modulo): bool
@@ -171,6 +217,61 @@ class ServicioProgreso
         }
 
         return (int) round(($completados / $total) * 100);
+    }
+
+    /**
+     * @param  array<int, int|string>  $identificadores
+     * @return array<int, array{completados: int, total: int, porcentaje: int, completado: bool}>
+     */
+    private function resumirAgrupados(
+        Usuario $usuario,
+        string $columnaAgrupacion,
+        array $identificadores,
+    ): array {
+        $resumenes = [];
+
+        foreach ($identificadores as $identificador) {
+            $resumenes[(int) $identificador] = $this->crearResumen(0, 0);
+        }
+
+        if ($identificadores === []) {
+            return $resumenes;
+        }
+
+        $filas = Modulo::query()
+            ->join('niveles', 'niveles.id', '=', 'modulos.nivel_id')
+            ->leftJoin('progreso_modulos_usuario as progresos', function (JoinClause $union) use ($usuario): void {
+                $union->on('progresos.modulo_id', '=', 'modulos.id')
+                    ->where('progresos.usuario_id', '=', $usuario->getKey());
+            })
+            ->where('modulos.publicado', true)
+            ->where('niveles.publicado', true)
+            ->whereIn($columnaAgrupacion, $identificadores)
+            ->groupBy($columnaAgrupacion)
+            ->selectRaw("{$columnaAgrupacion} as agrupador")
+            ->selectRaw('COUNT(modulos.id) as total')
+            ->selectRaw('COUNT(progresos.id) as completados')
+            ->get();
+
+        foreach ($filas as $fila) {
+            $resumenes[(int) $fila->agrupador] = $this->crearResumen(
+                (int) $fila->completados,
+                (int) $fila->total,
+            );
+        }
+
+        return $resumenes;
+    }
+
+    /** @return array{completados: int, total: int, porcentaje: int, completado: bool} */
+    private function crearResumen(int $completados, int $total): array
+    {
+        return [
+            'completados' => $completados,
+            'total' => $total,
+            'porcentaje' => $this->calcularPorcentaje($completados, $total),
+            'completado' => $total > 0 && $completados === $total,
+        ];
     }
 
     /** @return array<string, TipoActividad>|null */
