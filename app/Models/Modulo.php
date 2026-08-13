@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,6 +30,11 @@ class Modulo extends Model
             'creado_en' => 'immutable_datetime',
             'actualizado_en' => 'immutable_datetime',
         ];
+    }
+
+    public function scopePublicados(Builder $consulta): Builder
+    {
+        return $consulta->where('publicado', true);
     }
 
     public function nivel(): BelongsTo

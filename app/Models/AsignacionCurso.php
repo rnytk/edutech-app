@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,6 +29,29 @@ class AsignacionCurso extends Model
             'creado_en' => 'immutable_datetime',
             'actualizado_en' => 'immutable_datetime',
         ];
+    }
+
+    public function scopeVigentes(Builder $consulta, ?CarbonInterface $momento = null): Builder
+    {
+        $momento ??= now();
+
+        return $consulta
+            ->where('activo', true)
+            ->where(fn (Builder $rango): Builder => $rango
+                ->whereNull('inicia_en')
+                ->orWhere('inicia_en', '<=', $momento))
+            ->where(fn (Builder $rango): Builder => $rango
+                ->whereNull('finaliza_en')
+                ->orWhere('finaliza_en', '>=', $momento));
+    }
+
+    public function scopeAplicablesA(Builder $consulta, Usuario $usuario): Builder
+    {
+        return $consulta
+            ->where('colegio_id', $usuario->colegio_id)
+            ->where(fn (Builder $grado): Builder => $grado
+                ->whereNull('grado_academico_id')
+                ->orWhere('grado_academico_id', $usuario->grado_academico_id));
     }
 
     public function curso(): BelongsTo
