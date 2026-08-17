@@ -98,15 +98,26 @@
                             @else
                                 <ul class="mt-4 space-y-2" aria-label="Módulos de {{ $tarjeta['nivel']->titulo }}">
                                     @foreach ($tarjeta['modulos'] as $modulo)
-                                        <li data-modulo-id="{{ $modulo['modulo']->getKey() }}" data-modulo-estado="{{ $modulo['estado'] }}" class="flex items-center gap-2 text-xs">
-                                            <span @class([
-                                                'size-2.5 shrink-0 rounded-full',
-                                                'bg-emerald-400' => $modulo['estado'] === 'completado',
-                                                'bg-[#FFD629]' => $modulo['estado'] === 'disponible',
-                                                'bg-white/35' => $modulo['estado'] === 'bloqueado',
-                                            ])></span>
-                                            <span class="min-w-0 flex-1 truncate">{{ $modulo['modulo']->titulo }}</span>
-                                            <span class="sr-only">Estado: {{ $modulo['estado'] }}</span>
+                                        <li data-modulo-id="{{ $modulo['modulo']->getKey() }}" data-modulo-estado="{{ $modulo['estado'] }}" class="text-xs">
+                                            @if ($modulo['estado'] === 'bloqueado')
+                                                <div aria-disabled="true" class="flex min-h-10 cursor-not-allowed items-center gap-2 rounded-xl px-2 text-white/60">
+                                                    <span class="size-2.5 shrink-0 rounded-full bg-white/35"></span>
+                                                    <span class="min-w-0 flex-1 truncate">{{ $modulo['modulo']->titulo }}</span>
+                                                    <span aria-hidden="true">🔒</span>
+                                                    <span class="sr-only">Estado: bloqueado</span>
+                                                </div>
+                                            @else
+                                                <a href="{{ route('modulos.ver', $modulo['modulo']) }}" wire:navigate class="flex min-h-10 items-center gap-2 rounded-xl px-2 transition hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFD629]">
+                                                    <span @class([
+                                                        'size-2.5 shrink-0 rounded-full',
+                                                        'bg-emerald-400' => $modulo['estado'] === 'completado',
+                                                        'bg-[#FFD629]' => $modulo['estado'] === 'disponible',
+                                                    ])></span>
+                                                    <span class="min-w-0 flex-1 truncate">{{ $modulo['modulo']->titulo }}</span>
+                                                    <span aria-hidden="true">→</span>
+                                                    <span class="sr-only">Estado: {{ $modulo['estado'] }}</span>
+                                                </a>
+                                            @endif
                                         </li>
                                     @endforeach
                                 </ul>

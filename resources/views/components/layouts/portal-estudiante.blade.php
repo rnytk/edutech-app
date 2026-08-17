@@ -23,11 +23,11 @@
                             alt="Cooperativa KATO-KI R.L."
                             class="h-11 w-24 shrink-0 object-contain object-left sm:h-12 sm:w-28"
                         >
-                        <span class="truncate font-display text-2xl tracking-wide sm:text-3xl">EduTech KATO-KI</span>
+                       <!-- <span class="truncate font-display text-2xl tracking-wide sm:text-3xl">EduTech KATO-KI</span> -->
                     </a>
 
                     <div class="flex items-center gap-3 sm:gap-5">
-                        <nav aria-label="Navegación principal">
+                        <!-- <nav aria-label="Navegación principal">
                             <a
                                 href="{{ route('portal.inicio') }}"
                                 aria-current="page"
@@ -35,9 +35,9 @@
                                 wire:navigate
                             >
                                 Inicio
-                            </a>
+                            </a> 
                         </nav>
-
+                    -->
                         <form method="POST" action="{{ route('estudiante.logout') }}">
                             @csrf
                             <button

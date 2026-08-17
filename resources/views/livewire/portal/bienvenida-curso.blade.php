@@ -48,12 +48,12 @@
             @endif
         </div>
 
-        <div class="order-1 flex justify-center pt-7 lg:order-2 lg:pt-20">
-            <img
-                src="{{ Vite::asset('resources/images/portal/icono-bienvenida.svg') }}"
-                alt="Personaje de bienvenida de EduTech KATO-KI"
-                class="w-[min(72vw,24rem)] object-contain drop-shadow-[0_18px_20px_rgba(0,0,0,0.14)] sm:w-[25rem] lg:w-[min(36vw,34rem)]"
-            >
-        </div>
+       <div class="order-1 flex justify-center pt-7 lg:order-2 lg:justify-start lg:pt-20">
+    <img
+        src="{{ Vite::asset('resources/images/portal/icono-bienvenida.svg') }}"
+        alt="Personaje de bienvenida de EduTech KATO-KI"
+        class="w-[min(72vw,24rem)] object-contain drop-shadow-[0_18px_20px_rgba(0,0,0,0.14)] sm:w-[25rem] lg:w-[42rem] lg:max-w-none lg:-translate-x-8"
+    >
+</div>
     </div>
 </section>
